@@ -25,6 +25,8 @@ $("#submit-info").on("click", function (event) {
     console.log(trainName)
     console.log(firstTrain)
 
+
+
     var currentTime = moment()
     console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"))
     var convertFirstTime = moment(firstTrain, "HH:mm").subtract(1, "years")
@@ -34,16 +36,22 @@ $("#submit-info").on("click", function (event) {
     var minutesTill = frequency - (diffInTime % frequency)
     console.log("Minutes Away " + minutesTill)
     var nextTrain = moment().add(minutesTill, "minutes")
-    console.log(moment(nextTrain).format("HH:mm A"))
+    console.log("Next Train military time ", moment(nextTrain).format("HH:mm A"))
+    var nextTrainTime = moment(nextTrain).format("hh:mm A")
 
     database.ref("/TrainInfo").push({
         trainName,
         destination,
-        firstTrain,
         frequency,
+        minutesTill,
+        nextTrainTime,
         dateAdded: firebase.database.ServerValue.TIMESTAMP
     })
 
+    $("#train-name").val("")
+    $("#dest-info").val("")
+    $("#first-train").val("")
+    $("#frequency").val("")
 })
 
 database.ref("/TrainInfo").on("child_added", function (snapshot) {
@@ -54,9 +62,8 @@ database.ref("/TrainInfo").on("child_added", function (snapshot) {
     //var firstTrainTd = $("<td>").text(snapshot.val().firstTrain)
 
     var frequencyTd = $("<td>").text(snapshot.val().frequency)
-    var nextArrival = $("<td>").text("next arrival")
-    var minutesAwayTd = $("<td>").text("minutes away")
-    //var monthlyRateTd = $("<td>").text(snapshot.val().frequency)
+    var nextArrival = $("<td>").text(snapshot.val().nextTrainTime)
+    var minutesAwayTd = $("<td>").text(snapshot.val().minutesTill)
 
     addRow.append(trainTd, destTd, frequencyTd, nextArrival, minutesAwayTd)
     $("#train-info").append(addRow)
