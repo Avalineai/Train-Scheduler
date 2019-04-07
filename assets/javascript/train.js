@@ -30,29 +30,41 @@ $("#submit-info").on("click", function (event) {
     //     alert("input invalid")
     // }
 
-    var currentTime = moment().format("HH:mm")
+    var currentTime = moment().format("hh:mma")
     console.log("CURRENT TIME: " + currentTime)
-
-    var convertFirstTime = moment(firstTrain, "HH:mm").subtract(1, "years")
+    var diffInTime
+    var minutesTill
+    var nextTrain
+    var convertArr = firstTrain.split(":")
+    var firstTrainTime = moment().hours(convertArr[0]).minutes(convertArr[1]);
+    var convertFirstTime = moment(firstTrainTime).format("hh:mma")
     console.log("First Time Converted " + convertFirstTime)
 
-    var diffInTime = moment(currentTime).format("HH:mm").diff(moment(convertFirstTime), "minutes")
-    console.log(moment())
-    console.log((moment(convertFirstTime)))
-    console.log("First Train Time in Minutes " + diffInTime)
+    console.log("First Train After Current Time?", moment(currentTime, "hh:mma").isBefore(moment(convertFirstTime, "hh:mma")))
+    if (moment(currentTime, "hh:mma").isBefore(moment(convertFirstTime, "hh:mma"))) {
+    
+        diffInTime = moment(convertFirstTime, "hh:mma").diff(moment(currentTime, "hh:mma"), "minutes")
+        console.log("difference " + (diffInTime))
+        nextTrain = moment(convertFirstTime, "hh:mma").format("hh:mma")
+        console.log(moment(convertFirstTime, "hh:mma").format("hh:mma"))
+        minutesTill = diffInTime
+    }
+    else {
+        diffInTime = moment(currentTime, "hh:mma").diff(moment(convertFirstTime, "hh:mma"), "minutes")
+        console.log("difference " + diffInTime)
 
-    var minutesTill = frequency - (diffInTime % frequency)
-    console.log("Minutes Away " + minutesTill)
-    var nextTrain = moment().add(minutesTill, "minutes")
-    console.log("Next Train military time ", moment(nextTrain).format("HH:mm A"))
-    var nextTrainTime = moment(nextTrain).format("hh:mm A")
-
+        minutesTill = frequency - (diffInTime % frequency)
+        console.log("Minutes Away " + minutesTill)
+        nextTrain = moment(currentTime, "hh:mma").add(minutesTill, "minutes").format("hh:mma")
+        console.log("Next Train military time ", moment(nextTrain, "hh:mma").format("hh:mma"))
+    }
+    
     database.ref("/TrainInfo").push({
         trainName,
         destination,
         frequency,
         minutesTill,
-        nextTrainTime,
+        nextTrain,
         dateAdded: firebase.database.ServerValue.TIMESTAMP
     })
 
@@ -67,7 +79,7 @@ database.ref("/TrainInfo").on("child_added", function (snapshot) {
     var trainTd = $("<td>").text(snapshot.val().trainName)
     var destTd = $("<td>").text(snapshot.val().destination)
     var frequencyTd = $("<td>").text(snapshot.val().frequency)
-    var nextArrival = $("<td>").text(snapshot.val().nextTrainTime)
+    var nextArrival = $("<td>").text(snapshot.val().nextTrain)
     var minutesAwayTd = $("<td>").text(snapshot.val().minutesTill)
 
     addRow.append(trainTd, destTd, frequencyTd, nextArrival, minutesAwayTd)
@@ -81,40 +93,5 @@ database.ref("/TrainInfo").on("child_added", function (snapshot) {
 
 function timeCatch() {
 
-
 }
-
-// function validateTime(obj) {
-//     var timeValue = obj;
-//     if (timeValue == "" || timeValue.indexOf(":") < 0) {
-//         alert("Invalid Time format");
-//         return false;
-//     }
-//     else {
-//         var sHours = timeValue.split(':')[0];
-//         var sMinutes = timeValue.split(':')[1];
-
-//         if (sHours == "" || isNaN(sHours) || parseInt(sHours) > 23) {
-//             alert("Invalid Time format");
-//             return false;
-//         }
-//         else if (parseInt(sHours) == 0)
-//             sHours = "00";
-//         else if (sHours < 10)
-//             sHours = "0" + sHours;
-
-//         if (sMinutes == "" || isNaN(sMinutes) || parseInt(sMinutes) > 59) {
-//             alert("Invalid Time format");
-//             return false;
-//         }
-//         else if (parseInt(sMinutes) == 0)
-//             sMinutes = "00";
-//         else if (sMinutes < 10)
-//             sMinutes = "0" + sMinutes;
-
-//         obj = sHours + ":" + sMinutes;
-//     }
-
-//     return true;
-//  }
 
